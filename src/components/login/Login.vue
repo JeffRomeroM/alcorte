@@ -4,7 +4,7 @@
 
       <div class="brand">
         <div class="logo">
-          <img src="/public/logoSinFondo.png" alt="" width="150">
+          <img src="/public/logo.png" alt="" width="120">
         </div>
 
         <p>Ingresa tus credenciales para gestionar tu taller</p>

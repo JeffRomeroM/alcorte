@@ -1,17 +1,31 @@
 <template>
   <header class="header">
-
     <div class="brand">
       <div class="brand-logo">
-        <img src="/logoSinFondo.png" alt="AlCorte Logo" />
-      </div>
-      <div class="brand-info">
+        <img src="/logo.png" alt="AlCorte Logo" />
       </div>
     </div>
 
-    <div class="desktop-actions">
+    <div 
+      v-if="!loading" 
+      class="mobile-trigger-identity mobile-only" 
+      @click="mobileMenu = !mobileMenu"
+      :class="{ 'trigger-active': mobileMenu }"
+    >
+      <div class="avatar mini-avatar">
+        <img v-if="userLogo" :src="userLogo" alt="Logo Taller" class="avatar-img" />
+        <span v-else>{{ initials }}</span>
+      </div>
+      <div class="mobile-trigger-info">
+        <span class="trigger-title">Taller {{ userName }}</span>
+        <span class="trigger-sub">
+          Mi Cuenta <Icon :icon="mobileMenu ? 'mdi:chevron-up' : 'mdi:chevron-down'" />
+        </span>
+      </div>
+    </div>
+    <div v-else class="loading-user mobile-only">Cargando...</div>
 
-      <!-- Toda la tarjeta ahora redirige a editar perfil -->
+    <div class="desktop-actions desktop-only">
       <div 
         v-if="!loading" 
         class="user-card" 
@@ -41,64 +55,53 @@
           Salir
         </button>
       </div>
-
     </div>
-
-    <button class="menu-btn" @click="mobileMenu = !mobileMenu">
-      <Icon :icon="mobileMenu ? 'mdi:close' : 'mdi:menu'" />
-    </button>
 
     <Transition name="slide">
       <div v-if="mobileMenu" class="mobile-menu">
-
-        <!-- En móvil también se vuelve interactivo todo el bloque superior -->
-        <div 
-          v-if="!loading" 
-          class="mobile-user" 
-          @click="mobileMenu = false; router.push('/editar-perfil')"
-        >
-          <div class="avatar">
-            <img v-if="userLogo" :src="userLogo" alt="Logo Taller" class="avatar-img" />
-            <span v-else>{{ initials }}</span>
+        <div class="mobile-menu-inner">
+          
+          <div class="mobile-extended-info">
+            <div class="avatar large-avatar">
+              <img v-if="userLogo" :src="userLogo" alt="Logo Taller" class="avatar-img" />
+              <span v-else>{{ initials }}</span>
+            </div>
+            <h3>Taller {{ userName }}</h3>
+            <p class="meta-row"><Icon icon="mdi:email-outline" /> {{ userEmail }}</p>
+            <p v-if="userPhone" class="meta-row"><Icon icon="mdi:phone-outline" /> {{ userPhone }}</p>
           </div>
-          <div class="user-info">
-            <strong>Taller {{ userName }}</strong>
-            <small class="info-row"><Icon icon="mdi:email-outline" /> {{ userEmail }}</small>
-            <small v-if="userPhone" class="info-row"><Icon icon="mdi:phone-outline" /> {{ userPhone }}</small>
+
+          <div class="mobile-menu-actions">
+            <button class="menu-action-btn edit-profile-btn" @click="mobileMenu = false; router.push('/editar-perfil')">
+              <Icon icon="mdi:account-edit-outline" />
+              Editar Perfil del Taller
+            </button>
+            
+            <button class="menu-action-btn close-session-btn" @click="showLogoutModal = true">
+              <Icon icon="mdi:logout" />
+              Cerrar Sesión
+            </button>
           </div>
-          <Icon icon="mdi:chevron-right" class="mobile-arrow-icon" />
-        </div>
 
-        <div class="mobile-actions">
-          <button class="mobile-logout" @click="showLogoutModal = true">
-            <Icon icon="mdi:logout" />
-            Cerrar sesión
-          </button>
         </div>
-
       </div>
     </Transition>
 
     <Transition name="fade">
-      <div v-if="showLogoutModal" class="modal-overlay">
+      <div v-if="showLogoutModal" class="modal-overlay" @click.self="showLogoutModal = false">
         <div class="modal">
           <div class="modal-icon">
             <Icon icon="mdi:logout-variant" />
           </div>
           <h3>Cerrar sesión</h3>
-          <p>¿Deseas cerrar tu sesión?</p>
+          <p>¿Deseas cerrar tu sesión activa?</p>
           <div class="modal-actions">
-            <button class="cancel-btn" @click="showLogoutModal = false">
-              Cancelar
-            </button>
-            <button class="confirm-btn" @click="logout">
-              Sí, salir
-            </button>
+            <button class="cancel-btn" @click="showLogoutModal = false">Cancelar</button>
+            <button class="confirm-btn" @click="logout">Sí, salir</button>
           </div>
         </div>
       </div>
     </Transition>
-
   </header>
 </template>
 
@@ -136,7 +139,6 @@ const initials = computed(() => {
 const fetchUserProfile = async () => {
   try {
     loading.value = true
-    
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       router.push('/')
@@ -158,7 +160,6 @@ const fetchUserProfile = async () => {
       if (profile.telefono) userPhone.value = profile.telefono
       if (profile.logo_url) userLogo.value = profile.logo_url
     }
-
   } catch (error) {
     console.error('Error al cargar el perfil del taller:', error.message)
   } finally {
@@ -168,7 +169,8 @@ const fetchUserProfile = async () => {
 
 const logout = async () => {
   await supabase.auth.signOut()
-  showLogoutModal.value = false
+  showLogoutModal = false
+  mobileMenu = false
   router.push('/')
 }
 
@@ -178,279 +180,216 @@ onMounted(() => {
 </script>
 
 <style scoped>
-:root{
-  --primary:#003034;
-  --secondary:#07141a;
-  --accent:#00c896;
-  --white:#ffffff;
-  --gray:#64748b;
-  --light:#f8fafc;
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 70px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .03);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.header{
-  position:sticky;
-  top:0;
-  z-index:1000;
-  height:70px;
-  background:white;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 20px;
-  border-bottom:1px solid #e2e8f0;
-  box-shadow: 0 5px 20px rgba(0,0,0,.05);
-  font-family: sans-serif;
+/* Identidad de Marca (Izquierda siempre) */
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-logo { height: 40px; display: flex; align-items: center; }
+.brand-logo img { height: 100%; object-fit: contain; }
+
+/* Disparador Móvil (Derecha) */
+.mobile-trigger-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 12px 6px 8px;
+  border-radius: 30px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 60%;
+}
+.mobile-trigger-identity:hover,
+.mobile-trigger-identity.trigger-active {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
 }
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
+.mobile-trigger-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
-
-.brand-logo{
-  height:40px;
-  display:flex;
-  align-items:center;
+.trigger-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
-
-.brand-logo img{
-  height:100%;
-  object-fit:contain;
-}
-
-.brand-info span{
-  color:#64748b;
-  font-size:.85rem;
+.trigger-sub {
+  font-size: 10px;
+  color: #64748b;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 1px;
 }
 
-.desktop-actions{
-  display:flex;
-  align-items:center;
-  gap:24px;
-}
-
-/* Tarjeta interactiva de escritorio */
-.user-card{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  cursor:pointer;
+/* Escritorio */
+.desktop-actions { display: flex; align-items: center; gap: 24px; }
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
   padding: 6px 12px;
   border-radius: 12px;
-  transition: all 0.2s ease;
+  transition: background 0.2s;
 }
+.user-card:hover { background: #f1f5f9; }
 
-.user-card:hover {
-  background: #f1f5f9;
-  opacity: 0.9;
-}
-
-.loading-user {
+/* Avatares */
+.avatar {
+  width: 42px;
+  height: 42px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
   font-size: 14px;
-  color: #64748b;
-}
-
-.avatar{
-  width:44px;
-  height:44px;
-  color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;
-  overflow:hidden;
+  overflow: hidden;
   flex-shrink: 0;
 }
+.mini-avatar { width: 32px; height: 32px; font-size: 11px; }
+.large-avatar { width: 70px; height: 70px; font-size: 22px; margin: 0 auto 12px auto; border-color: #003034; }
+.avatar-img { width: 100%; height: 100%; object-fit: cover; }
 
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-info{
-  display:flex;
-  flex-direction:column;
-  gap:2px;
-}
-
-.user-info strong{
-  font-size:.95rem;
-  color:#0f172a;
-}
-
-.info-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color:#64748b;
-  font-size: 12px;
-}
-
-.actions-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.user-info { display: flex; flex-direction: column; gap: 2px; }
+.user-info strong { font-size: .95rem; color: #0f172a; }
+.info-row { display: flex; align-items: center; gap: 4px; color: #64748b; font-size: 12px; }
 
 .logout-btn {
-  border:none;
-  padding:10px 14px;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  gap:6px;
-  cursor:pointer;
-  font-weight:600;
-  font-size: 14px;
-  transition: all 0.2s;
-  background:#003034;
-  color:white;
-}
-
-.logout-btn:hover{
-  opacity:.9;
-}
-
-.menu-btn{
-  display:none;
-  border:none;
-  background:none;
-  font-size:28px;
-  color:#003034;
-  cursor:pointer;
-}
-
-.mobile-menu{
-  position:absolute;
-  top:70px;
-  left:0;
-  right:0;
-  background:white;
-  border-bottom:1px solid #e2e8f0;
-  padding:20px;
-  box-shadow: 0 10px 15px rgba(0,0,0,.05);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
   display: flex;
-  flex-direction: column;
-  gap:16px;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  background: #003034;
+  color: white;
+  transition: opacity 0.2s;
 }
+.logout-btn:hover { opacity: .9; }
+.loading-user { font-size: 13px; color: #64748b; font-weight: 500; }
 
-/* Bloque interactivo de móvil */
-.mobile-user{
-  display:flex;
-  gap:12px;
-  align-items:center;
-  cursor:pointer;
-  padding: 10px;
-  border-radius: 12px;
-  background: #f8fafc;
-  transition: background 0.2s ease;
+/* Menú Desplegable en Móvil */
+.mobile-menu {
+  position: absolute;
+  top: 76px;
+  left: 16px;
+  right: 16px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
-
-.mobile-user:active {
-  background: #f1f5f9;
+.mobile-extended-info {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed #e2e8f0;
 }
-
-.mobile-arrow-icon {
-  margin-left: auto;
-  font-size: 20px;
+.mobile-extended-info h3 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  color: #0f172a;
+  font-weight: 800;
+}
+.meta-row {
+  margin: 4px 0;
+  font-size: 13px;
   color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
-.mobile-actions {
+.mobile-menu-actions {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-
-.mobile-logout {
-  width:100%;
-  border:none;
-  padding:12px;
-  border-radius:10px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:8px;
-  cursor:pointer;
-  font-weight:600;
+.menu-action-btn {
+  width: 100%;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-size: 14px;
-  background:#003034;
-  color:white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
 }
+.edit-profile-btn { background: #f1f5f9; color: #334155; }
+.edit-profile-btn:active { background: #e2e8f0; }
 
-/* MODAL */
-.modal-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:20px;
+.close-session-btn { background: #fee2e2; color: #ef4444; }
+.close-session-btn:active { background: #fca5a5; }
+
+/* Modales globales de salida */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 10000;
 }
-
-.modal{
-  width:100%;
-  max-width:400px;
-  background:white;
-  border-radius:24px;
-  padding:30px;
-  text-align:center;
+.modal {
+  width: 100%;
+  max-width: 360px;
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
+.modal-icon { font-size: 48px; color: #ef4444; margin-bottom: 8px; }
+.modal h3 { color: #0f172a; margin: 0 0 8px 0; font-size: 18px; }
+.modal p { color: #64748b; font-size: 14px; margin: 0 0 20px 0; }
+.modal-actions { display: flex; gap: 10px; }
+.cancel-btn, .confirm-btn { flex: 1; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; }
+.cancel-btn { background: #f1f5f9; color: #475569; }
+.confirm-btn { background: #ef4444; color: white; }
 
-.modal-icon{
-  font-size:54px;
-  color:#ef4444;
-  margin-bottom:10px;
-}
+/* Transiciones de Renderizado Vue */
+.fade-enter-active, .fade-leave-active { transition: .15s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+.slide-enter-active, .slide-leave-active { transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+.slide-enter-from, .slide-leave-to { opacity: 0; transform: translateY(-8px); }
 
-.modal h3{
-  color:#0f172a;
-  margin-bottom:10px;
-}
-
-.modal p{
-  color:#64748b;
-  font-size: 14px;
-}
-
-.modal-actions{
-  display:flex;
-  gap:10px;
-  margin-top:25px;
-}
-
-.cancel-btn, .confirm-btn{
-  flex:1;
-  border:none;
-  padding:12px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:600;
-}
-
-.cancel-btn{
-  background:#e2e8f0;
-  color: #334155;
-}
-
-.confirm-btn{
-  background:#ef4444;
-  color:white;
-}
-
-/* ANIMATIONS */
-.fade-enter-active, .fade-leave-active{ transition:.25s; }
-.fade-enter-from, .fade-leave-to{ opacity:0; }
-
-.slide-enter-active, .slide-leave-active{ transition:.25s; }
-.slide-enter-from, .slide-leave-to{ opacity:0; transform:translateY(-10px); }
+/* Clases de Visibilidad Selectiva */
+.desktop-only { display: flex !important; }
+.mobile-only { display: none !important; }
 
 @media(max-width:768px){
-  .desktop-actions{ display:none; }
-  .menu-btn{ display:block; }
+  .desktop-only { display: none !important; }
+  .mobile-only { display: flex !important; }
 }
 </style>

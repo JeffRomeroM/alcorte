@@ -12,6 +12,23 @@ const mostrarHeader = computed(() => {
   return !rutasOcultas.includes(route.path)
 })
 
+import { onMounted } from 'vue'
+import { createClient } from '@supabase/supabase-js'
+import { useRouter } from 'vue-router'
+
+const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_KEY)
+const router = useRouter()
+
+onMounted(() => {
+  // Este método detecta inicios y cierres de sesión globalmente
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || !session) {
+      // Limpia cualquier estado global si usas Pinia/Vuex aquí
+      router.push('/')
+    }
+  })
+})
+
 </script>
 
 <template>
@@ -24,8 +41,9 @@ const mostrarHeader = computed(() => {
 <style>
 
 *{
-  margin: 0;
-  padding: 0;
+  margin: 0 ;
+  padding: 0 ;
+
 }
 html, body {
   height: 100%;

@@ -44,6 +44,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/recordatorios',
+    name: 'recordatorios',
+    component: () => import('../views/Recordatorios/VistaRecordatorios.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/completar-perfil',
     name: 'completar-perfil',
     component: () => import('../views/profile/CompletarPerfil.vue'),

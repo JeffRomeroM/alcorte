@@ -1002,10 +1002,24 @@ onMounted(() => {
 
 /* Adaptabilidad Móvil */
 @media (max-width: 640px) {
+  .ordenes-container { 
+    padding: 24px; 
+    max-width: 1300px; 
+    margin: 0 auto; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
   .header-actions { flex-direction: column; align-items: stretch; gap: 14px; }
   .btn-primary { justify-content: center; }
   .form-grid-2 { grid-template-columns: 1fr; gap: 0; }
   .info-detalles-grid { grid-template-columns: 1fr; }
+  
+  .orden-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px;
+    width: 82% ;
+  }
+
   .dinamic-row { flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
   .dinamic-row .flex-3 { width: 100%; flex: none; }
   .orden-footer { flex-direction: column; gap: 12px; align-items: flex-start; }
