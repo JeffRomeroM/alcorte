@@ -169,8 +169,8 @@ const fetchUserProfile = async () => {
 
 const logout = async () => {
   await supabase.auth.signOut()
-  showLogoutModal = false
-  mobileMenu = false
+  showLogoutModal.value = false
+  mobileMenu.value = false
   router.push('/')
 }
 
