@@ -184,7 +184,7 @@ onMounted(() => {
   position: sticky;
   top: 0;
   z-index: 1000;
-  height: 70px;
+  height: 55px;
   background: #ffffff;
   display: flex;
   align-items: center;
@@ -389,7 +389,9 @@ onMounted(() => {
 .mobile-only { display: none !important; }
 
 @media(max-width:768px){
+  
   .desktop-only { display: none !important; }
   .mobile-only { display: flex !important; }
+
 }
 </style>

@@ -1,12 +1,13 @@
 <template>
   <div class="charts-container">
 
-    <div class="chart-card">
-      <h3>Facturación Mensual</h3>
-      <canvas ref="facturacionChart"></canvas>
-    </div>
+    
 
     <div class="chart-grid">
+      <div class="chart-card">
+        <h3>Facturación Mensual</h3>
+        <canvas ref="facturacionChart"></canvas>
+      </div>
 
       <div class="chart-card">
         <h3>Tipos de Servicio</h3>
@@ -268,6 +269,7 @@ onMounted(() => {
   display:flex;
   flex-direction:column;
   gap:24px;
+  width: 90%!important;
 }
 
 .chart-grid{
@@ -283,6 +285,7 @@ onMounted(() => {
   border:1px solid #e2e8f0;
   box-shadow:
   0 4px 12px rgba(0,0,0,.05);
+  width: 90%;
 }
 
 .chart-card h3{
@@ -298,6 +301,9 @@ canvas{
 
   .chart-grid{
     grid-template-columns:1fr;
+  }
+  .chart-card{
+    width:90%;
   }
 
 }
