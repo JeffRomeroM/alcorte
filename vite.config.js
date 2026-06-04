@@ -12,15 +12,15 @@ export default defineConfig({
         short_name: 'AlCorte',
         start_url: '/',
         display: 'standalone',
-        background_color: '#003034',
+        background_color: '#ffffff',
         icons: [
           {
-            src: 'logoSinFondo.png',
+            src: 'iconoapp.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'logoSinFondo.png',
+            src: 'logo.png',
             sizes: '512x512',
             type: 'image/png'
           }
