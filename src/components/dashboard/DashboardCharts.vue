@@ -1,28 +1,35 @@
 <template>
   <div class="charts-container">
 
-    
-
     <div class="chart-grid">
+
       <div class="chart-card">
-        <h3>Facturación Mensual</h3>
+        <div class="card-header">
+          <h3>Facturación Mensual</h3>
+        </div>
         <canvas ref="facturacionChart"></canvas>
       </div>
 
       <div class="chart-card">
-        <h3>Tipos de Servicio</h3>
+        <div class="card-header">
+          <h3>Tipos de Servicio</h3>
+        </div>
         <canvas ref="serviciosChart"></canvas>
       </div>
 
       <div class="chart-card">
-        <h3>Estados de Órdenes</h3>
+        <div class="card-header">
+          <h3>Estados de Órdenes</h3>
+        </div>
         <canvas ref="estadoChart"></canvas>
       </div>
 
     </div>
 
-    <div class="chart-card">
-      <h3>Motocicletas Más Atendidas</h3>
+    <div class="chart-card full-width">
+      <div class="card-header">
+        <h3>Motocicletas Más Atendidas</h3>
+      </div>
       <canvas ref="motosChart"></canvas>
     </div>
 
@@ -66,37 +73,49 @@ const serviciosChart = ref(null)
 const estadoChart = ref(null)
 const motosChart = ref(null)
 
-const cargarGraficos = async () => {
-  try {
-
-    const {
-      data: { user }
-    } = await supabase.auth.getUser()
-
-    if (!user) return
-
-    const { data: ordenes } =
-      await supabase
-        .from('ordenes_trabajo')
-        .select(`
-          *,
-          motos(
-            marca,
-            modelo
-          )
-        `)
-        .eq('user_id', user.id)
-
-    if (!ordenes) return
-
-    crearGraficoFacturacion(ordenes)
-    crearGraficoServicios(ordenes)
-    crearGraficoEstados(ordenes)
-    crearGraficoMotos(ordenes)
-
-  } catch (error) {
-    console.error(error)
+const opcionesBase = {
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: {
+    duration: 1200
+  },
+  plugins: {
+    legend: {
+      position: 'bottom',
+      labels: {
+        usePointStyle: true,
+        padding: 20
+      }
+    }
   }
+}
+
+const cargarGraficos = async () => {
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser()
+
+  if (!user) return
+
+  const { data: ordenes } =
+    await supabase
+      .from('ordenes_trabajo')
+      .select(`
+        *,
+        motos(
+          marca,
+          modelo
+        )
+      `)
+      .eq('user_id', user.id)
+
+  if (!ordenes) return
+
+  crearGraficoFacturacion(ordenes)
+  crearGraficoServicios(ordenes)
+  crearGraficoEstados(ordenes)
+  crearGraficoMotos(ordenes)
 }
 
 const crearGraficoFacturacion = (ordenes) => {
@@ -114,11 +133,11 @@ const crearGraficoFacturacion = (ordenes) => {
     const fecha =
       new Date(o.fecha_ingreso)
 
-    const mes =
+    ingresos[
       fecha.getMonth()
-
-    ingresos[mes] +=
-      Number(o.total_general || 0)
+    ] += Number(
+      o.total_general || 0
+    )
 
   })
 
@@ -127,16 +146,28 @@ const crearGraficoFacturacion = (ordenes) => {
     {
       type:'bar',
       data:{
-        labels: meses,
+        labels:meses,
         datasets:[
           {
             label:'Facturación',
-            data: ingresos
+            data:ingresos,
+            backgroundColor:'#14b8a6',
+            borderRadius:12,
+            borderSkipped:false
           }
         ]
       },
       options:{
-        responsive:true
+        ...opcionesBase,
+        plugins:{
+          ...opcionesBase.plugins,
+          tooltip:{
+            callbacks:{
+              label:(ctx)=>
+                `$${Number(ctx.raw).toFixed(2)}`
+            }
+          }
+        }
       }
     }
   )
@@ -146,12 +177,16 @@ const crearGraficoServicios = (ordenes) => {
 
   const mantenimientos =
     ordenes.filter(
-      o => o.tipo_servicio === 'Mantenimiento'
+      o =>
+      o.tipo_servicio ===
+      'Mantenimiento'
     ).length
 
   const reparaciones =
     ordenes.filter(
-      o => o.tipo_servicio !== 'Mantenimiento'
+      o =>
+      o.tipo_servicio !==
+      'Mantenimiento'
     ).length
 
   new Chart(
@@ -168,9 +203,18 @@ const crearGraficoServicios = (ordenes) => {
             data:[
               mantenimientos,
               reparaciones
-            ]
+            ],
+            backgroundColor:[
+              '#14b8a6',
+              '#3b82f6'
+            ],
+            borderWidth:0
           }
         ]
+      },
+      options:{
+        ...opcionesBase,
+        cutout:'65%'
       }
     }
   )
@@ -180,17 +224,23 @@ const crearGraficoEstados = (ordenes) => {
 
   const recibidas =
     ordenes.filter(
-      o => o.estado === 'Recibida'
+      o =>
+      o.estado ===
+      'Recibida'
     ).length
 
   const proceso =
     ordenes.filter(
-      o => o.estado === 'En proceso'
+      o =>
+      o.estado ===
+      'En proceso'
     ).length
 
   const listas =
     ordenes.filter(
-      o => o.estado === 'Lista para entregar'
+      o =>
+      o.estado ===
+      'Lista para entregar'
     ).length
 
   new Chart(
@@ -200,7 +250,7 @@ const crearGraficoEstados = (ordenes) => {
       data:{
         labels:[
           'Recibidas',
-          'En Proceso',
+          'En proceso',
           'Listas'
         ],
         datasets:[
@@ -209,9 +259,19 @@ const crearGraficoEstados = (ordenes) => {
               recibidas,
               proceso,
               listas
-            ]
+            ],
+            backgroundColor:[
+              '#f59e0b',
+              '#3b82f6',
+              '#22c55e'
+            ],
+            borderWidth:0
           }
         ]
+      },
+      options:{
+        ...opcionesBase,
+        cutout:'65%'
       }
     }
   )
@@ -242,17 +302,26 @@ const crearGraficoMotos = (ordenes) => {
       type:'bar',
       data:{
         labels:
-          top.map(i => i[0]),
+          top.map(i=>i[0]),
         datasets:[
           {
             label:'Servicios',
             data:
-              top.map(i => i[1])
+              top.map(i=>i[1]),
+            backgroundColor:[
+              '#14b8a6',
+              '#3b82f6',
+              '#8b5cf6',
+              '#f59e0b',
+              '#ef4444'
+            ],
+            borderRadius:12,
+            borderSkipped:false
           }
         ]
       },
       options:{
-        responsive:true,
+        ...opcionesBase,
         indexAxis:'y'
       }
     }
@@ -263,48 +332,148 @@ onMounted(() => {
   cargarGraficos()
 })
 </script>
-
 <style scoped>
-.charts-container{
-  display:flex;
-  flex-direction:column;
-  gap:24px;
-  width: 90%!important;
+.charts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
 }
 
-.chart-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:24px;
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 24px;
 }
 
-.chart-card{
-  background:white;
-  padding:24px;
-  border-radius:20px;
-  border:1px solid #e2e8f0;
+.chart-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
   box-shadow:
-  0 4px 12px rgba(0,0,0,.05);
-  width: 90%;
+    0 10px 25px rgba(0, 0, 0, 0.05),
+    0 4px 10px rgba(0, 0, 0, 0.03);
+  transition: all .25s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.chart-card h3{
-  margin-bottom:20px;
-  color:#003034;
+.chart-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(
+    90deg,
+    #003034,
+    #00b894,
+    #0984e3
+  );
 }
 
-canvas{
-  max-height:350px;
+.chart-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 20px 35px rgba(0, 0, 0, 0.08),
+    0 8px 15px rgba(0, 0, 0, 0.05);
 }
 
-@media(max-width:768px){
+.chart-card h3 {
+  margin: 0 0 20px;
+  color: #003034;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  .chart-grid{
-    grid-template-columns:1fr;
+.chart-card canvas {
+  width: 100% !important;
+  height: 320px !important;
+}
+
+.chart-card.large canvas {
+  height: 420px !important;
+}
+
+/* Estado vacío */
+.empty-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* Loader */
+.chart-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #e2e8f0;
+  border-top-color: #00b894;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  .chart-card{
-    width:90%;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .charts-container {
+    gap: 18px;
   }
 
+  .chart-card {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .chart-card h3 {
+    font-size: 1rem;
+  }
+
+  .chart-card canvas {
+    height: 260px !important;
+  }
+
+  .chart-card.large canvas {
+    height: 320px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card {
+    padding: 16px;
+  }
+
+  .chart-card canvas {
+    height: 220px !important;
+  }
 }
 </style>

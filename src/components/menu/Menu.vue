@@ -122,7 +122,7 @@ import { Icon } from '@iconify/vue'
 
   .menu-mobile{
     position:fixed;
-    bottom:1px;
+    bottom:0px;
     left:0;
     width:100%;
     height:55px;
