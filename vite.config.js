@@ -12,7 +12,7 @@ export default defineConfig({
         short_name: 'AlCorte',
         start_url: '/',
         display: 'standalone',
-        background_color: '#ffffff',
+        background_color: '#003034',
         icons: [
           {
             src: 'iconoapp.png',

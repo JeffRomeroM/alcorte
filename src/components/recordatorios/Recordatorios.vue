@@ -9,8 +9,8 @@
 
       <div class="stats">
         <div class="stat-card">
-          <span>{{ recordatorios.length }}</span>
-          <small>Total</small>
+          <span>{{ recordatoriosFiltrados.length }}</span>
+          <small>Recordatorios</small>
         </div>
       </div>
     </div>
@@ -65,15 +65,27 @@
 
         <div class="info">
 
-          <p>
-            <strong>Cliente:</strong>
-            {{ orden.motos?.clientes?.nombre }}
-          </p>
+          <div >
+            <p>
+              <strong class="cliente">
+                <Icon icon="mdi:account" /> 
+                {{ orden.motos?.clientes?.nombre }} 
 
-          <p>
-            <strong>Teléfono:</strong>
-            {{ orden.motos?.clientes?.telefono }}
-          </p>
+              </strong>
+
+            </p>
+            <p>
+              <strong class="cliente">
+
+                <Icon icon="mdi:phone" />
+                {{ orden.motos?.clientes?.telefono }}
+              </strong>
+
+            </p>
+            
+            
+          </div>
+
 
           <p>
             <strong>Último mantenimiento:</strong>
@@ -82,29 +94,17 @@
 
           <p>
             <strong>Próximo mantenimiento:</strong>
-            {{ formatFecha(
-              calcularProximaFecha(
-                orden.fecha_ingreso
-              )
-            ) }}
+            {{ formatFecha(orden.proximo_mantenimiento) }}
           </p>
 
           <p>
             <strong>Días restantes:</strong>
-
             <span
               :style="{
-                color:
-                  diasRestantes(
-                    orden.fecha_ingreso
-                  ) < 0
-                    ? '#dc2626'
-                    : '#16a34a'
+                color: diasRestantes(orden.proximo_mantenimiento) < 0 ? '#dc2626' : '#16a34a'
               }"
             >
-              {{ diasRestantes(
-                orden.fecha_ingreso
-              ) }}
+              {{ diasRestantes(orden.proximo_mantenimiento) }}
             </span>
           </p>
 
@@ -125,15 +125,10 @@
 </template>
 
 <script setup>
-import {
-  ref,
-  computed,
-  onMounted
-} from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { createClient } from '@supabase/supabase-js'
+import { Icon } from '@iconify/vue'
 
-import {
-  createClient
-} from '@supabase/supabase-js'
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -145,195 +140,135 @@ const recordatorios = ref([])
 const busqueda = ref('')
 
 const cargarRecordatorios = async () => {
-
   try {
-
     loading.value = true
 
-    const {
-      data: { user }
-    } = await supabase.auth.getUser()
-
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    const { data, error } =
-      await supabase
-        .from('ordenes_trabajo')
-        .select(`
-          *,
-          motos(
-            marca,
-            modelo,
-            placa,
-            clientes(
-              nombre,
-              telefono
-            )
+    // Añadido 'proximo_mantenimiento' a la query select
+    const { data, error } = await supabase
+      .from('ordenes_trabajo')
+      .select(`
+        *,
+        proximo_mantenimiento,
+        motos(
+          marca,
+          modelo,
+          placa,
+          clientes(
+            nombre,
+            telefono
           )
-        `)
-        .eq('user_id', user.id)
-        .eq('tipo_servicio', 'Mantenimiento')
+        )
+      `)
+      .eq('user_id', user.id)
+      .eq('tipo_servicio', 'Mantenimiento')
 
     if (error) throw error
 
-    recordatorios.value = (data || [])
-      .sort((a, b) => {
-
-        const fechaA =
-          calcularProximaFecha(
-            a.fecha_ingreso
-          )
-
-        const fechaB =
-          calcularProximaFecha(
-            b.fecha_ingreso
-          )
-
-        return fechaA - fechaB
-
-      })
+    // Ordenar directamente por la fecha de próximo mantenimiento real
+    recordatorios.value = (data || []).sort((a, b) => {
+      const fechaA = a.proximo_mantenimiento ? new Date(a.proximo_mantenimiento) : new Date(0)
+      const fechaB = b.proximo_mantenimiento ? new Date(b.proximo_mantenimiento) : new Date(0)
+      return fechaA - fechaB
+    })
 
   } catch (error) {
-
-    console.error(error)
-
+    console.error('Error cargando recordatorios:', error)
   } finally {
-
     loading.value = false
-
   }
-
 }
 
-const calcularProximaFecha = (fecha) => {
-
-  const d = new Date(fecha)
-
-  d.setDate(
-    d.getDate() + 75
-  )
-
-  return d
-
-}
-
-const diasRestantes = (fecha) => {
-
+const diasRestantes = (fechaProxima) => {
+  if (!fechaProxima) return 0
   const hoy = new Date()
+  hoy.setHours(0, 0, 0, 0) // Normalizar horas para evitar desfases numéricos
+  
+  const proxima = new Date(fechaProxima)
+  proxima.setHours(0, 0, 0, 0)
 
-  const proxima =
-    calcularProximaFecha(fecha)
-
-  return Math.ceil(
-    (proxima - hoy) /
-    (1000 * 60 * 60 * 24)
-  )
-
+  const diferenciaTiempo = proxima - hoy
+  return Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24))
 }
 
 const obtenerEstado = (orden) => {
-
-  const dias =
-    diasRestantes(
-      orden.fecha_ingreso
-    )
-
-  if (dias < 0)
-    return 'Vencido'
-
-  if (dias <= 15)
-    return 'Próximo'
-
+  const dias = diasRestantes(orden.proximo_mantenimiento)
+  if (dias < 0) return 'Vencido'
+  if (dias <= 10) return 'Próximo'
   return 'Pendiente'
-
 }
 
 const estadoClase = (orden) => {
-
-  const estado =
-    obtenerEstado(orden)
-
-  if (estado === 'Vencido')
-    return 'vencido'
-
-  if (estado === 'Próximo')
-    return 'proximo'
-
+  const estado = obtenerEstado(orden)
+  if (estado === 'Vencido') return 'vencido'
+  if (estado === 'Próximo') return 'proximo'
   return 'pendiente'
-
 }
 
-const recordatoriosFiltrados =
-computed(() => {
-
-  return recordatorios.value.filter(
-    orden => {
-
-      const texto =
-        `${orden.motos?.marca}
-         ${orden.motos?.modelo}
-         ${orden.motos?.placa}
-         ${orden.motos?.clientes?.nombre}`
-          .toLowerCase()
-
-      return texto.includes(
-        busqueda.value.toLowerCase()
-      )
-
-    }
-  )
-
+const recordatoriosFiltrados = computed(() => {
+  return recordatorios.value.filter(orden => {
+    const texto = `
+      ${orden.motos?.marca || ''} 
+      ${orden.motos?.modelo || ''} 
+      ${orden.motos?.placa || ''} 
+      ${orden.motos?.clientes?.nombre || ''}
+    `.toLowerCase()
+    return texto.includes(busqueda.value.toLowerCase())
+  })
 })
 
-const formatFecha = fecha => {
-
-  return new Date(fecha)
-    .toLocaleDateString('es-NI')
-
+const formatFecha = (fecha) => {
+  if (!fecha) return 'Sin fecha'
+  // Reemplazar guiones por barras evita que JavaScript reste un día por la zona horaria UTC
+  const fechaLocal = new Date(fecha.replace(/-/g, '\/'))
+  return fechaLocal.toLocaleDateString('es-NI')
 }
 
-const enviarWhatsApp = orden => {
+const enviarWhatsApp = async (orden) => {
+  if (!orden) return
 
-  const cliente =
-    orden.motos?.clientes?.nombre ||
-    'Cliente'
+  try {
+    const cliente = orden.motos?.clientes?.nombre || 'Cliente'
+    const moto = `${orden.motos?.marca || ''} ${orden.motos?.modelo || ''}`
+    const fecha = formatFecha(orden.proximo_mantenimiento)
+    let profile = null
 
-  const telefono =
-    orden.motos?.clientes?.telefono
 
-  const moto =
-    `${orden.motos?.marca}
-     ${orden.motos?.modelo}`
+    const { data: { user } } = await supabase.auth.getUser()
 
-  const fecha =
-    formatFecha(
-      calcularProximaFecha(
-        orden.fecha_ingreso
-      )
+    if (user) {
+
+      const { data: pData, error: pError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id) 
+        .maybeSingle()  
+
+      if (!pError && pData) {
+        profile = pData
+      }
+    }
+
+
+    const nombreTaller = profile?.nombre_negocio || profile?.nombre || 'ALCORTE'
+    
+    const telefono = orden.motos?.clientes?.telefono 
+      ? orden.motos.clientes.telefono.replace(/\s+/g, '') 
+      : ''
+
+    const mensaje = `*Taller ${nombreTaller}*🛠\n\n🔧 *RECORDATORIO DE MANTENIMIENTO*\n\nHola ${cliente}.\n\nTe recordamos que tu motocicleta *${moto}* está próxima a su mantenimiento preventivo.\n\n📅 *Fecha recomendada:*\n${fecha}\n\n¿Deseas reservar una cita?\n\nGracias por confiar en nosotros.`
+
+    window.open(
+      `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`,
+      '_blank'
     )
-
-  const mensaje = `
-🔧 RECORDATORIO DE MANTENIMIENTO
-
-Hola ${cliente}.
-
-Te recordamos que tu motocicleta ${moto}
-está próxima a su mantenimiento preventivo.
-
-📅 Fecha recomendada:
-${fecha}
-
-¿Deseas reservar una cita?
-
-Gracias por confiar en nosotros.
-`
-
-  window.open(
-    `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`,
-    '_blank'
-  )
-
+  } catch (error) {
+    console.error("Error al enviar recordatorio por WhatsApp:", error)
+  }
 }
+
 
 onMounted(() => {
   cargarRecordatorios()
@@ -344,92 +279,84 @@ onMounted(() => {
 .recordatorios-container{
   padding:24px;
 }
-
+ .header h1{
+  font-size: 24px; 
+  font-weight: 800; 
+  color: #003034;
+}
 .header{
   display:flex;
   justify-content:space-between;
   align-items:center;
   margin-bottom:20px;
 }
-
 .search-box{
   margin-bottom:20px;
 }
-
 .search-box input{
   width:100%;
   padding:14px;
   border:1px solid #ddd;
   border-radius:10px;
+  box-sizing: border-box;
 }
-
 .stats{
   display:flex;
   gap:12px;
 }
-
 .stat-card{
   background:#003034;
   color:white;
   padding:15px 25px;
   border-radius:12px;
 }
-
 .stat-card span{
   display:block;
   font-size:24px;
   font-weight:700;
 }
-
 .cards{
   display:grid;
-  grid-template-columns:
-  repeat(auto-fill,minmax(330px,1fr));
+  grid-template-columns: repeat(auto-fill,minmax(330px,1fr));
   gap:20px;
 }
-
 .card{
   background:white;
   border:1px solid #e5e7eb;
   border-radius:16px;
   padding:20px;
+  box-sizing: border-box;
 }
-
 .card-top{
   display:flex;
   justify-content:space-between;
   margin-bottom:15px;
 }
-
 .placa{
   background:#f1f5f9;
   padding:4px 8px;
   border-radius:6px;
   font-size:12px;
 }
-
 .estado{
   padding:6px 12px;
   border-radius:20px;
   font-size:12px;
   font-weight:700;
+  align-self: flex-start;
 }
-
 .vencido{
   background:#fee2e2;
   color:#dc2626;
 }
-
 .proximo{
   background:#fef3c7;
   color:#d97706;
 }
-
 .pendiente{
   background:#dcfce7;
   color:#16a34a;
 }
-
 .info{
   display:flex;
   flex-direction:column;
@@ -437,17 +364,21 @@ onMounted(() => {
   margin-bottom:20px;
 }
 
+
 .btn-whatsapp{
   width:100%;
   border:none;
-  background:#25D366;
+  background:#003034;
   color:white;
   padding:14px;
   border-radius:10px;
   cursor:pointer;
   font-weight:700;
+  transition: background 0.2s;
 }
-
+.btn-whatsapp:hover {
+  background: #9e9e9e;
+}
 .loading,
 .empty{
   text-align:center;
@@ -461,18 +392,8 @@ onMounted(() => {
     align-items: flex-start;
     gap: 12px;
   }
-  .search-box {
-    margin-bottom: 12px;
-    }
-  .search-box input {
-    width: 91%;
-  
+  .cards {
+    grid-template-columns: 1fr;
   }
-  .card{
-    padding: 15px;
-    width: 86%;
-  }
-
-
 }
 </style>
