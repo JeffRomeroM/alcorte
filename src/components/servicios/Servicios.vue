@@ -85,7 +85,7 @@
 
         <div class="orden-footer" @click.stop>
           <div class="orden-total">
-            <span class="total-label">Total:</span> ${{ orden.total_general }}
+            <span class="total-label">Total:</span> C$ {{ orden.total_general }}
           </div>
 
           <div class="orden-actions no-print">
@@ -150,7 +150,7 @@
               <tbody>
                 <tr v-for="(s, i) in detallesCargados.servicios" :key="i">
                   <td>{{ s.descripcion }}</td>
-                  <td class="text-right">${{ parseFloat(s.precio).toFixed(2) }}</td>
+                  <td class="text-right">C$ {{ parseFloat(s.precio).toFixed(2) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -170,16 +170,16 @@
                 <tr v-for="(r, i) in detallesCargados.repuestos" :key="i">
                   <td>{{ r.repuesto_nombre }}</td>
                   <td class="text-center">{{ r.cantidad }}</td>
-                  <td class="text-right">${{ parseFloat(r.precio_unitario).toFixed(2) }}</td>
-                  <td class="text-right">${{ (r.cantidad * r.precio_unitario).toFixed(2) }}</td>
+                  <td class="text-right">C$ {{ parseFloat(r.precio_unitario).toFixed(2) }}</td>
+                  <td class="text-right">C$ {{ (r.cantidad * r.precio_unitario).toFixed(2) }}</td>
                 </tr>
               </tbody>
             </table>
 
             <div class="totales-resumen">
-              <div class="total-line">Mano de Obra: <span>${{ ordenSeleccionada?.total_mano_obra }}</span></div>
-              <div class="total-line">Repuestos / Fluidos: <span>${{ ordenSeleccionada?.total_repuestos }}</span></div>
-              <div class="total-line grand-total">Total Facturado: <span>${{ ordenSeleccionada?.total_general }}</span></div>
+              <div class="total-line">Mano de Obra: <span>C${{ ordenSeleccionada?.total_mano_obra }}</span></div>
+              <div class="total-line">Repuestos / Fluidos: <span>C$ {{ ordenSeleccionada?.total_repuestos }}</span></div>
+              <div class="total-line grand-total">Total Facturado: <span>C$ {{ ordenSeleccionada?.total_general }}</span></div>
             </div>
           </div>
         </div>
@@ -292,9 +292,12 @@
           </div>
 
           <div v-for="(serv, idx) in form.servicios" :key="'s-' + idx" class="dinamic-row">
-            <input v-model="serv.descripcion" type="text" placeholder="Descripción de la mano de obra" required class="flex-3" />
-            <div class="currency-input flex-1">
-              <span>$</span>
+            <div class="inputs">
+              <label for="serv.descripcion">Descripción: </label>
+              <input v-model="serv.descripcion" type="text" placeholder="Descripción de la mano de obra" required class="flex-3" />
+            </div>
+            <div class="inputs ">
+              <label for="serv.precio">Precio: </label>
               <input v-model.number="serv.precio" type="number" min="0" step="0.01" placeholder="0.00" required />
             </div>
             <button type="button" @click="removerServicioFila(idx)" class="btn-row-delete" title="Remover">
@@ -311,11 +314,21 @@
           </div>
 
           <div v-for="(rep, idx) in form.repuestos" :key="'r-' + idx" class="dinamic-row">
-            <input v-model="rep.repuesto_nombre" type="text" placeholder="Nombre de la pieza" required class="flex-3" />
-            <input v-model.number="rep.cantidad" type="number" min="1" placeholder="Cant" required class="flex-0-5 text-center" />
-            <div class="currency-input flex-1">
-              <span>$</span>
-              <input v-model.number="rep.precio_unitario" type="number" min="0" step="0.01" placeholder="U. $" required />
+            <div class="inputs">
+              <label for="rep.repuesto_nombre">Repuesto / Pieza: </label>
+              <input v-model="rep.repuesto_nombre" type="text" placeholder="Nombre del repuesto" required class="flex-3" />
+            </div>
+
+            <div class="inputs">
+              <label for="rep.cantidad">Cantidad: </label>
+              <input v-model.number="rep.cantidad" type="number" min="1" placeholder="1" required class="flex-0-5 text-center" />
+            </div>
+
+            
+            <div class="inputs flex-1">
+            
+              <label for="rep.precio_unitario">Precio Unitario: </label>
+              <input v-model.number="rep.precio_unitario" type="number" min="0" step="0.01" placeholder="0.00" required />
             </div>
             <button type="button" @click="removerRepuestoFila(idx)" class="btn-row-delete" title="Remover">
               <Icon icon="mdi:trash-can-outline" />
@@ -714,17 +727,17 @@ const compartirWhatsApp = async (orden) => {
 
     if (servs.length > 0) {
       mensaje += `*Servicios y Mano de Obra:*\n`
-      servs.forEach(s => mensaje += `- ${s.descripcion}: $${parseFloat(s.precio).toFixed(2)}\n`)
+      servs.forEach(s => mensaje += `- ${s.descripcion}: $C${parseFloat(s.precio).toFixed(2)}\n`)
       mensaje += `\n`
     }
 
     if (reps.length > 0) {
       mensaje += `*Repuestos Aplicados:*\n`
-      reps.forEach(r => mensaje += `- ${r.cantidad}x ${r.repuesto_nombre}: $${(r.cantidad * r.precio_unitario).toFixed(2)}\n`)
+      reps.forEach(r => mensaje += `- ${r.cantidad}x ${r.repuesto_nombre}: $C${(r.cantidad * r.precio_unitario).toFixed(2)}\n`)
       mensaje += `\n`
     }
 
-    mensaje += `*Total General:* $${orden.total_general}\n`
+    mensaje += `*Total General:* $C${orden.total_general}\n`
     mensaje += `*Gracias por su confianza*\n`
     
 
@@ -1085,18 +1098,39 @@ onMounted(async () => {
 }
 .btn-link:hover { text-decoration: underline; }
 
-.dinamic-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+.dinamic-row { 
+  display: flex; 
+  gap: 10px; 
+  margin-bottom: 10px; 
+  align-items: center;
+  flex-wrap: wrap;
+
+}
+
+
 .flex-3 { flex: 3; }
 .flex-1 { flex: 1; }
 .flex-0-5 { flex: 0.5; }
 
-.currency-input { position: relative; display: flex; align-items: center; }
-.currency-input span { position: absolute; left: 12px; font-size: 14px; color: #64748b; font-weight: 600; }
+.dinamic-row .inputs{
+  width: 100%;
+  
+
+}
+
+.dinamic-row .inputs input{
+  padding:5px;
+  border: none;
+  border-bottom: 1px solid #cbd5e1;
+  margin-top:2px;
+}
+
+
 .currency-input input { padding-left: 24px !important; width: 100%; }
 
 .btn-row-delete { 
   background: none; border: none; 
-  color: #94a3b8; cursor: pointer; 
+  color: #e25050; cursor: pointer; 
   font-size: 18px; padding: 6px; 
   border-radius: 6px; transition: all 0.2s;
 }
