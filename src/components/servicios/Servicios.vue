@@ -727,17 +727,17 @@ const compartirWhatsApp = async (orden) => {
 
     if (servs.length > 0) {
       mensaje += `*Servicios y Mano de Obra:*\n`
-      servs.forEach(s => mensaje += `- ${s.descripcion}: $C${parseFloat(s.precio).toFixed(2)}\n`)
+      servs.forEach(s => mensaje += `- ${s.descripcion}: C$ ${ parseFloat(s.precio).toFixed(2)}\n`)
       mensaje += `\n`
     }
 
     if (reps.length > 0) {
       mensaje += `*Repuestos Aplicados:*\n`
-      reps.forEach(r => mensaje += `- ${r.cantidad}x ${r.repuesto_nombre}: $C${(r.cantidad * r.precio_unitario).toFixed(2)}\n`)
+      reps.forEach(r => mensaje += `- ${r.cantidad}x ${r.repuesto_nombre}: C$ ${( r.cantidad * r.precio_unitario).toFixed(2)}\n`)
       mensaje += `\n`
     }
 
-    mensaje += `*Total General:* $C${orden.total_general}\n`
+    mensaje += `*Total General:* C$ ${ orden.total_general.toFixed(2)}\n`
     mensaje += `*Gracias por su confianza*\n`
     
 
