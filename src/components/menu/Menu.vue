@@ -2,13 +2,14 @@
  
     <!-- DESKTOP -->
     <nav class="menu-desktop">
-      <router-link to="/motos" class="item">
-        <Icon icon="mdi:motorbike" />
-        <span>Motos</span>
-      </router-link>
+      
       <router-link to="/dashboard" class="item">
         <Icon icon="mdi:chart-bar" />
         <span>Dashboard</span>
+      </router-link>
+      <router-link to="/motos" class="item">
+        <Icon icon="mdi:motorbike" />
+        <span>Motos</span>
       </router-link>
 
       <router-link to="/clientes" class="item">
@@ -83,7 +84,7 @@ import { Icon } from '@iconify/vue'
   gap:10px;
   padding:12px 20px;
   position:sticky;
-  top:70px;
+  top:45px;
   z-index:100;
 }
 

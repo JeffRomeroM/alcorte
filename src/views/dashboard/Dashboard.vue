@@ -21,7 +21,7 @@ import DashboardActivity from '../../components/dashboard/DashboardActivity.vue'
   padding:24px;
   display:flex;
   flex-direction:column;
-  gap:24px;
+  gap:14px;
   background:#f8fafc;
 }
 </style>

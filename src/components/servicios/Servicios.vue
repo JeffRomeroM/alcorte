@@ -1128,6 +1128,9 @@ onMounted(async () => {
 
 .currency-input input { padding-left: 24px !important; width: 100%; }
 
+textarea{
+  width: 100%!important;
+}
 .btn-row-delete { 
   background: none; border: none; 
   color: #e25050; cursor: pointer; 

@@ -359,6 +359,7 @@ onMounted(() => {
   overflow: hidden;
 }
 
+    
 .chart-card::before {
   content: "";
   position: absolute;

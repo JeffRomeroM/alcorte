@@ -353,8 +353,9 @@ onMounted(() => {
 .activity-grid{
   display:grid;
   grid-template-columns:
-  repeat(auto-fit,minmax(350px,1fr));
+  repeat(auto-fit,minmax(250px,1fr));
   gap:20px;
+  
 }
 
 .card{
@@ -366,6 +367,7 @@ onMounted(() => {
   transition:.3s;
   max-height:420px;
   overflow:auto;
+
 }
 
 .card:hover{
@@ -495,6 +497,7 @@ onMounted(() => {
 
   .activity-grid{
     grid-template-columns:1fr;
+    margin-bottom: 40px;
   }
 
   .card{
