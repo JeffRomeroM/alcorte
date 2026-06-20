@@ -52,15 +52,17 @@
         <span>Servicios</span>
       </router-link>
 
+      <router-link to="/motos" class="mobile-item">
+        <Icon icon="mdi:motorbike" />
+        <span>Motos</span>
+      </router-link>
+
       <router-link to="/recordatorios" class="mobile-item">
         <Icon icon="mdi:calendar-clock-outline" />
         <span>Record.</span>
       </router-link>
 
-      <router-link to="/motos" class="mobile-item">
-        <Icon icon="mdi:motorbike" />
-        <span>Motos</span>
-      </router-link>
+      
       
 
     </nav>

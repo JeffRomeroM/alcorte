@@ -397,8 +397,9 @@ onMounted(() => {
 .btn-danger { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
 .btn-danger:hover { background: #dc2626; }
 .btn-danger:disabled { opacity: 0.7; cursor: not-allowed; }
-.modal-overlay { position: fixed; top: 2; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
-.modal-content { background: white; width: 100%; max-width: 500px; border-radius: 20px; padding: 30px; max-height: 90vh; overflow-y: auto; }
+.modal-overlay { position: fixed; top: 60px; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 15px; }
+
+.modal-content { background: white; width: 100%; max-width: 500px; border-radius: 20px; padding: 30px; max-height: 94vh; overflow-y: auto; }
 .modal-content h2 { margin-bottom: 20px; color: #003034; margin-top: 0; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .form-group { margin-bottom: 16px; }
@@ -420,5 +421,9 @@ onMounted(() => {
   .header-actions { flex-direction: column; align-items: stretch; gap: 16px; }
   .btn-primary { justify-content: center; }
   .form-grid { grid-template-columns: 1fr; gap: 0; }
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 15px; }
+
+  .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 20px; padding: 30px; max-height: 83vh; overflow-y: auto; }
+  
 }
 </style>
