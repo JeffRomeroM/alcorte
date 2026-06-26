@@ -71,6 +71,7 @@
 
 <script setup>
 import { Icon } from '@iconify/vue'
+import '../../assets/main.css'  
 </script>
 
 <style scoped>
@@ -107,7 +108,7 @@ import { Icon } from '@iconify/vue'
 }
 
 .item.router-link-active{
-  background:#003034;
+  background: var(--color-primario);
   color:white;
 }
 

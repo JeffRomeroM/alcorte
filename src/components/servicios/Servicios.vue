@@ -385,6 +385,7 @@
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import { createClient } from '@supabase/supabase-js'
+import '../../assets/main.css'
 
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_KEY)
 
@@ -802,7 +803,7 @@ onMounted(async () => {
   white-space: nowrap; 
 }
 .tab-btn:hover { background: #e2e8f0; color: #0f172a; }
-.tab-btn.active { background: #003034; color: white; border-color: #003034; }
+.tab-btn.active { background: var(--color-primario); color: white; border-color: var(--color-primario); }
 
 /* Grid de Tarjetas */
 .ordenes-grid { 
@@ -1174,7 +1175,7 @@ textarea{
 
 /* Botones Generales */
 .btn-primary { 
-  background: #003034; color: white; 
+  background: var(--color-primario); color: white; 
   border: none; border-radius: 10px; 
   padding: 10px 20px; font-weight: 600; 
   font-size: 14px; cursor: pointer; 

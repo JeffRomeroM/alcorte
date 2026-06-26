@@ -110,7 +110,7 @@ import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'vue-router'
-
+import '../../assets/main.css'
 const router = useRouter()
 
 const supabase = createClient(
@@ -180,6 +180,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+
 .header {
   position: sticky;
   top: 0;
@@ -266,11 +268,11 @@ onMounted(() => {
   flex-shrink: 0;
 }
 .mini-avatar { width: 32px; height: 32px; font-size: 11px; }
-.large-avatar { width: 70px; height: 70px; font-size: 22px; margin: 0 auto 12px auto; border-color: #003034; }
+.large-avatar { width: 70px; height: 70px; font-size: 22px; margin: 0 auto 12px auto; border-color: var(--color-primario) }
 .avatar-img { width: 100%; height: 100%; object-fit: cover; }
 
 .user-info { display: flex; flex-direction: column; gap: 2px; }
-.user-info strong { font-size: .95rem; color: #0f172a; }
+.user-info strong { font-size: .95rem; color: var(--color-primario); }
 .info-row { display: flex; align-items: center; gap: 4px; color: #64748b; font-size: 12px; }
 
 .logout-btn {
@@ -283,7 +285,7 @@ onMounted(() => {
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  background: #003034;
+  background: var(--color-primario);
   color: white;
   transition: opacity 0.2s;
 }

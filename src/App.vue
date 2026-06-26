@@ -27,7 +27,32 @@ onMounted(() => {
       router.push('/')
     }
   })
+  cargarTemaUsuario()
 })
+
+
+const cargarTemaUsuario = async () => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (user) {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('color_primario')
+        .eq('user_id', user.id) // Clave relacional correcta de tu tabla
+        .maybeSingle()
+
+      if (!error && profile?.color_primario) {
+        // Modifica la variable global en caliente
+        document.documentElement.style.setProperty('--color-primario', profile.color_primario)
+      }
+    }
+  } catch (err) {
+    console.error("Error al cargar el tema del usuario:", err)
+  }
+}
+
+
 
 </script>
 

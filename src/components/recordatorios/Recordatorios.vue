@@ -128,6 +128,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { createClient } from '@supabase/supabase-js'
 import { Icon } from '@iconify/vue'
+import '../../assets/main.css'
 
 
 const supabase = createClient(
@@ -305,7 +306,7 @@ onMounted(() => {
   gap:12px;
 }
 .stat-card{
-  background:#003034;
+  background: var(--color-primario);
   color:white;
   padding:15px 25px;
   border-radius:12px;
@@ -368,7 +369,7 @@ onMounted(() => {
 .btn-whatsapp{
   width:100%;
   border:none;
-  background:#003034;
+  background: var(--color-primario);
   color:white;
   padding:14px;
   border-radius:10px;

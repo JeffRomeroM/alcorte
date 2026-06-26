@@ -170,7 +170,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { createClient } from '@supabase/supabase-js'
-
+import '../../assets/main.css'
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_KEY)
 
 const motos = ref([])
@@ -390,7 +390,7 @@ onMounted(() => {
 .edit-btn:hover { background: #003034; color: white; }
 .delete-btn { background: #fee2e2; color: #ef4444; }
 .delete-btn:hover { background: #ef4444; color: white; }
-.btn-primary { background: #003034; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.btn-primary { background: var(--color-primario); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
 .btn-primary:hover { background: #07141a; }
 .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
 .btn-secondary { background: #f1f5f9; color: #475569; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; }

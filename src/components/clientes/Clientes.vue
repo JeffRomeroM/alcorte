@@ -135,6 +135,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { createClient } from '@supabase/supabase-js'
+import '../../assets/main.css'
 
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_KEY)
 
@@ -434,14 +435,14 @@ onMounted(() => {
 .ws-btn:hover { background: #25d366; color: white; }
 
 .edit-btn { background: #f1f5f9; color: #64748b; }
-.edit-btn:hover { background: #003034; color: white; }
+.edit-btn:hover { background: var(--color-primario); color: white; }
 
 .delete-btn { background: #fee2e2; color: #ef4444; }
 .delete-btn:hover { background: #ef4444; color: white; }
 
 /* Botones Generales */
 .btn-primary {
-  background: #003034;
+  background: var(--color-primario);
   color: white;
   border: none;
   padding: 10px 20px;

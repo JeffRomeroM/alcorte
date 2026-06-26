@@ -81,6 +81,11 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label>Color de la app</label>
+          <input type="color" v-model="form.color_primario"/>
+        </div>
+
         <div class="form-group" v-if="currentLogoUrl">
           <label>Logo actual de la aplicación</label>
           <div class="current-logo-preview">
@@ -133,6 +138,7 @@ import { reactive, ref, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useRouter } from 'vue-router'
 import { createClient } from '@supabase/supabase-js'
+import '../../assets/main.css'
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -151,7 +157,9 @@ const form = reactive({
   nombre_negocio: '',
   telefono: '',
   whatsapp: '',
-  direccion: ''
+  direccion: '',
+  color_primario: '#003034' // Valor por defecto
+
 })
 
 // Cargar la información existente del perfil
@@ -166,7 +174,7 @@ const cargarDatosPerfil = async () => {
 
     const { data: profile, error: dbError } = await supabase
       .from('profiles')
-      .select('nombre_propietario, nombre_negocio, telefono, whatsapp, direccion, logo_url')
+      .select('nombre_propietario, nombre_negocio, telefono, whatsapp, direccion, logo_url, color_primario')
       .eq('user_id', user.id)
       .single()
 
@@ -178,6 +186,7 @@ const cargarDatosPerfil = async () => {
       form.telefono = profile.telefono || ''
       form.whatsapp = profile.whatsapp || ''
       form.direccion = profile.direccion || ''
+      form.color_primario = profile.color_primario || '#003034'
       currentLogoUrl.value = profile.logo_url || null
     }
   } catch (error) {
@@ -289,6 +298,7 @@ const actualizarPerfil = async () => {
         telefono: form.telefono.trim(),
         whatsapp: form.whatsapp.trim(),
         direccion: form.direccion.trim(),
+        color_primario: form.color_primario,
         logo_url: logoUrl,
         profile_completed: true
       })
@@ -405,6 +415,7 @@ onMounted(() => {
   transition: border-color 0.2s;
 }
 
+
 .input-wrapper:focus-within {
   border-color: #003034;
 }
@@ -434,6 +445,14 @@ onMounted(() => {
   resize: none;
   font-size: 15px;
   font-family: sans-serif;
+}
+input[type="color"] {
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  padding: 0;
 }
 
 /* Estilo para la previsualización del logo existente */
@@ -536,7 +555,7 @@ onMounted(() => {
 
 .save-btn {
   flex: 2;
-  background: #003034;
+  background: var(--color-primario);
   color: white;
 }
 
